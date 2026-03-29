@@ -4,10 +4,11 @@ For deployment using Gunicorn
 """
 
 import os
+import sys
+
+sys.path.insert(0, os.path.dirname(__file__))  # add project root to Python path
+
 from app import create_app
 
-# Get environment (default to production for Render)
 env = os.environ.get('FLASK_ENV', 'production')
-
-# Create Flask app
 app = create_app(env)
