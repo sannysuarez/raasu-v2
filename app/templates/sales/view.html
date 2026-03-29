@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}Sale Details - RAASU POS{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">
+    <i class="fas fa-receipt"></i> Sale #{{ sale.id }}
+</h1>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Transaction Details</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-borderless">
+                    <tr>
+                        <td><strong>Sale ID:</strong></td>
+                        <td>#{{ sale.id }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Date:</strong></td>
+                        <td>{{ sale.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>User:</strong></td>
+                        <td>{{ sale.user.username }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Status:</strong></td>
+                        <td>
+                            {% if sale.is_printed %}
+                            <span class="badge bg-success">Printed</span>
+                            {% else %}
+                            <span class="badge bg-warning">Not Printed</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Items</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Product</th>
+                                <th>Quantity</th>
+                                <th>Price</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in sale.items %}
+                            <tr>
+                                <td>{{ item.product.name }}</td>
+                                <td>{{ item.quantity }}</td>
+                                <td>₦{{ "{:,.0f}".format(item.price) }}</td>
+                                <td>₦{{ "{:,.0f}".format(item.total) }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <hr>
+                <div class="text-end">
+                    <h4>Total: ₦{{ "{:,.0f}".format(sale.total_amount) }}</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <a href="{{ url_for('sales.list_sales') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back
+        </a>
+        {% if not sale.is_printed %}
+        <button id="btn-print" class="btn btn-primary">
+            <i class="fas fa-print"></i> Print Receipt
+        </button>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+document.getElementById('btn-print').addEventListener('click', function() {
+    fetch('/sales/api/print/{{ sale.id }}', {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Receipt printed successfully!');
+            location.reload();
+        } else {
+            alert('Error: ' + data.error);
+        }
+    });
+});
+</script>
+{% endblock %}

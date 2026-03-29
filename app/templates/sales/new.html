@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+
+{% block title %}New Sale - RAASU POS{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">
+    <i class="fas fa-plus-circle"></i> New Sale
+</h1>
+
+<div class="row">
+    <!-- Product Selection -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Select Products</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <input type="text" class="form-control" id="product-search" placeholder="Search products...">
+                </div>
+                <div id="products-list" style="max-height: 500px; overflow-y: auto;">
+                    <!-- Products loaded via JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Cart -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Cart</h5>
+            </div>
+            <div class="card-body">
+                <div id="cart-items">
+                    <p class="text-muted text-center">No items in cart</p>
+                </div>
+                <hr>
+                <div class="mb-3">
+                    <strong>Total: ₦<span id="cart-total">0</span></strong>
+                </div>
+                <button id="btn-complete-sale" class="btn btn-success w-100 me-2" disabled>
+                    <i class="fas fa-check"></i> Complete Sale
+                </button>
+                <button id="btn-print-receipt" class="btn btn-info w-100 mt-2" disabled>
+                    <i class="fas fa-print"></i> Print Receipt
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let cart = [];
+let products = [];
+
+// Load products
+fetch('/products/api/all')
+    .then(response => response.json())
+    .then(data => {
+        products = data;
+        renderProductsList();
+    });
+
+function renderProductsList() {
+    const search = document.getElementById('product-search').value.toLowerCase();
+    const filtered = products.filter(p => p.name.toLowerCase().includes(search));
+    
+    const html = filtered.map(p => `
+        <div class="row mb-2 p-2 border rounded">
+            <div class="col-8">
+                <div><strong>${p.name}</strong></div>
+                <small class="text-muted">₦${Number(p.price).toLocaleString(undefined,{maximumFractionDigits:0,minimumFractionDigits:0})}</small>
+            </div>
+            <div class="col-4 text-end">
+                <button class="btn btn-sm btn-primary" onclick="addToCart(${p.id}, '${p.name}', ${p.price})">
+                    <i class="fas fa-plus"></i>
+                </button>
+            </div>
+        </div>
+    `).join('');
+    
+    document.getElementById('products-list').innerHTML = html || '<p class="text-muted">No products found</p>';
+}
+
+function addToCart(productId, productName, price) {
+    const existing = cart.find(item => item.product_id === productId);
+    
+    if (existing) {
+        existing.quantity++;
+    } else {
+        cart.push({
+            product_id: productId,
+            product_name: productName,
+            price: price,
+            quantity: 1
+        });
+    }
+    
+    renderCart();
+}
+
+function removeFromCart(index) {
+    cart.splice(index, 1);
+    renderCart();
+}
+
+function updateQuantity(index, quantity) {
+    if (quantity > 0) {
+        cart[index].quantity = quantity;
+    } else {
+        removeFromCart(index);
+    }
+    renderCart();
+}
+
+function renderCart() {
+    if (cart.length === 0) {
+        document.getElementById('cart-items').innerHTML = '<p class="text-muted text-center">No items in cart</p>';
+        document.getElementById('btn-complete-sale').disabled = true;
+        document.getElementById('btn-print-receipt').disabled = true;
+        document.getElementById('cart-total').textContent = '0.00';
+        return;
+    }
+    
+    let total = 0;
+    const html = cart.map((item, index) => {
+        const itemTotal = item.price * item.quantity;
+        total += itemTotal;
+        return `
+            <div class="row mb-2 p-2 border rounded">
+                <div class="col-6">
+                    <div><strong>${item.product_name}</strong></div>
+                    <small>₦${Number(item.price).toLocaleString(undefined,{maximumFractionDigits:0,minimumFractionDigits:0})}</small>
+                </div>
+                <div class="col-3">
+                    <input type="number" class="form-control form-control-sm" value="${item.quantity}" 
+                           onchange="updateQuantity(${index}, parseInt(this.value))">
+                </div>
+                <div class="col-2 text-end">
+                    <button class="btn btn-sm btn-danger" onclick="removeFromCart(${index})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+                <div class="col-12 text-end mt-1"><small>₦${Number(itemTotal).toLocaleString(undefined,{maximumFractionDigits:0,minimumFractionDigits:0})}</small></div>
+            </div>
+        `;
+    }).join('');
+    
+    document.getElementById('cart-items').innerHTML = html;
+    document.getElementById('cart-total').textContent = Number(total).toLocaleString(undefined, {maximumFractionDigits:0, minimumFractionDigits:0});
+    document.getElementById('btn-complete-sale').disabled = false;
+    document.getElementById('btn-print-receipt').disabled = false;
+}
+
+document.getElementById('product-search').addEventListener('input', renderProductsList);
+
+document.getElementById('btn-complete-sale').addEventListener('click', function() {
+    fetch('/sales/new', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ items: cart })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Sale completed! Total: ₦' + Number(data.total).toLocaleString(undefined, {maximumFractionDigits:0, minimumFractionDigits:0}));
+            cart = [];
+            renderCart();
+        } else {
+            alert('Error: ' + data.error);
+        }
+    });
+});
+</script>
+{% endblock %}

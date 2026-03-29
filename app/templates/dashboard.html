@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - RAASU POS{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">
+    <i class="fas fa-tachometer-alt"></i> Dashboard
+</h1>
+
+<!-- Statistics -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="stat-card">
+            <h5>Today's Total</h5>
+            <div class="value" id="today-total">₦{{ "{:,.0f}".format(stats.today_total) }}</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <h5>Total Products</h5>
+            <div class="value">{{ stats.total_products }}</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <h5>Total Sales</h5>
+            <div class="value">{{ stats.total_sales }}</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <h5>Users</h5>
+            <div class="value">{{ stats.total_users }}</div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <a href="{{ url_for('sales.new_sale') }}" class="btn btn-primary me-2">
+                    <i class="fas fa-plus-circle"></i> New Sale
+                </a>
+                <a href="{{ url_for('products.list_products') }}" class="btn btn-info me-2">
+                    <i class="fas fa-boxes"></i> View Products
+                </a>
+                <a href="{{ url_for('sales.analytics_chart') }}" class="btn btn-success me-2">
+                    <i class="fas fa-chart-bar"></i> View Analytics
+                </a>
+                {% if stats.is_admin %}
+                <a href="{{ url_for('products.create_product') }}" class="btn btn-warning">
+                    <i class="fas fa-plus"></i> Add Product
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Sales -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Recent Sales</h5>
+            </div>
+            <div class="card-body">
+                <div id="recent-sales-loading">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+                <div id="recent-sales-content" style="display:none;">
+                    <!-- Loaded via JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Refresh today's total every 30 seconds
+setInterval(function() {
+    fetch('/api/dashboard-stats')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('today-total').innerHTML = '₦' + Number(data.today_total).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0});
+        });
+}, 30000);
+
+// Load recent sales (placeholder for now)
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('recent-sales-loading').style.display = 'none';
+    document.getElementById('recent-sales-content').innerHTML = '<p class="text-muted">No recent sales to display</p>';
+    document.getElementById('recent-sales-content').style.display = 'block';
+});
+</script>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}User Profile - RAASU POS{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">
+    <i class="fas fa-user"></i> User Profile
+</h1>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Profile Information</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-borderless">
+                    <tr>
+                        <td><strong>Username:</strong></td>
+                        <td>{{ current_user.username }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Email:</strong></td>
+                        <td>{{ current_user.email }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Account Type:</strong></td>
+                        <td>
+                            {% if current_user.is_admin %}
+                            <span class="badge bg-danger">Admin</span>
+                            {% else %}
+                            <span class="badge bg-primary">User</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Member Since:</strong></td>
+                        <td>{{ current_user.created_at.strftime('%Y-%m-%d') }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

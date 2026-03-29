@@ -1,0 +1,33 @@
+# Flask instance folder (if used for config)
+instance/
+
+# Flask config & Sensitive app settings
+config.py
+settings.py
+
+# PyCharm / VSCode / IDE files
+.idea/
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Database / SQLite
+*.db
+*.sqlite3
+
+# Secrets
+*.pem
+*.key
+
+# Virtual environment
+.env/
+
+# Compiled Python files
+__pycache__/
+*.pyc
+*.pyd
