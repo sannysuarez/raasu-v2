@@ -7,6 +7,6 @@ Werkzeug==2.3.7
 PySerial==3.5
 PyUSB==1.2.1
 python-dotenv==1.0.0
-matplotlib==3.7.2
+matplotlib==3.10.8
 # Force Pillow to use pre-built wheel to avoid Python 3.14 build issues
 Pillow==10.0.0 --only-binary :all:
