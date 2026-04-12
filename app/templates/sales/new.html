@@ -174,5 +174,42 @@ document.getElementById('btn-complete-sale').addEventListener('click', function(
         }
     });
 });
+
+document.getElementById('btn-print-receipt').addEventListener('click', function() {
+    if (cart.length === 0) {
+        alert('Cart is empty. Nothing to print.');
+        return;
+    }
+    
+    const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    
+    fetch('/sales/new', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ items: cart })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            fetch('/sales/api/print/' + data.sale_id, {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(printData => {
+                if (printData.success) {
+                    alert('Receipt printed successfully!');
+                    cart = [];
+                    renderCart();
+                } else {
+                    alert('Error: ' + printData.error);
+                }
+            });
+        } else {
+            alert('Error: ' + data.error);
+        }
+    });
+});
 </script>
 {% endblock %}

@@ -22,11 +22,23 @@
 
 <script>
 fetch('/sales/analytics/daily')
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`API error: ${response.status}`);
+        }
+        return response.json();
+    })
     .then(data => {
+        console.log('Analytics data:', data);
+        
+        if (!data.dates || !data.totals || data.dates.length === 0) {
+            document.getElementById('salesChart').innerHTML = '<p class="text-muted text-center mt-5">No sales data available</p>';
+            return;
+        }
+        
         const ctx = document.getElementById('salesChart').getContext('2d');
         const labels = data.dates.map(date => {
-            const d = new Date(date);
+            const d = new Date(date + 'T00:00:00Z');
             return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
         });
         
@@ -63,6 +75,10 @@ fetch('/sales/analytics/daily')
                 }
             }
         });
+    })
+    .catch(error => {
+        console.error('Error loading analytics:', error);
+        document.getElementById('salesChart').innerHTML = '<p class="text-danger text-center mt-5">Error loading chart: ' + error.message + '</p>';
     });
 </script>
 {% endblock %}

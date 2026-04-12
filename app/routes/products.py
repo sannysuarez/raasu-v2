@@ -22,7 +22,13 @@ def admin_required(f):
 def list_products():
     """List all products"""
     products = Product.query.filter_by(is_active=True).all()
-    return render_template('products/list.html', products=products)
+
+    total_products = Product.query.filter_by(is_active=True).count()
+    
+    stats = {
+        'total_products': total_products,
+    }
+    return render_template('products/list.html', products=products, stats=stats)
 
 @products_bp.route('/api/all')
 @login_required

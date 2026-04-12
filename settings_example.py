@@ -6,11 +6,11 @@ Configuration template (example) for public repository
 import os
 
 # Environment variable setup
-ENV = os.environ.get('FLASK_ENV', 'development')  # 'development' or 'production'
+ENV = os.environ.get('FLASK_ENV', 'production')  # 'development' or 'production'
 DEBUG = ENV == 'development'
 
 # Database
-DATABASE_URL = os.environ.get('DATABASE_URL', 'sqlite:///raasu.db')  # replace with your DB URL in production
+DATABASE_URL = os.environ.get('DATABASE_URL', 'sqlite:///raasu.db')  
 
 # Flask secret
 SECRET_KEY = os.environ.get('SECRET_KEY', 'replace-with-your-secret-key')

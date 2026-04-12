@@ -14,12 +14,6 @@ def init_database():
             'is_admin': True
         },
         {
-            'username': 'admin',
-            'email': 'admin@raasu.local',
-            'password': 'admin123',
-            'is_admin': True
-        },
-        {
             'username': 'Ibrahim',
             'email': 'ibrahim@raasu.local',
             'password': 'me@user',

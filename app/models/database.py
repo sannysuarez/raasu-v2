@@ -2,6 +2,19 @@ from app import db
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
+from zoneinfo import ZoneInfo
+
+# West Africa Time (WAT) timezone
+WAT = ZoneInfo("Africa/Lagos")
+
+
+def current_wat_datetime(ctx=None):
+    return datetime.now(WAT).replace(tzinfo=None)
+
+
+def current_wat_date(ctx=None):
+    return datetime.now(WAT).date()
+
 
 class User(UserMixin, db.Model):
     """User model for authentication"""
@@ -13,7 +26,7 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(255), nullable=False)
     is_admin = db.Column(db.Boolean, default=False)
     is_active = db.Column(db.Boolean, default=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=current_wat_datetime)
     
     # Relationships
     sales = db.relationship('Sale', backref='user', lazy='dynamic', cascade='all, delete-orphan')
@@ -39,8 +52,8 @@ class Product(db.Model):
     price = db.Column(db.Float, nullable=False)
     description = db.Column(db.Text)
     is_active = db.Column(db.Boolean, default=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=current_wat_datetime)
+    updated_at = db.Column(db.DateTime, default=current_wat_datetime, onupdate=current_wat_datetime)
     
     # Relationships
     sale_items = db.relationship('SaleItem', backref='product', lazy='dynamic', cascade='all, delete-orphan')
@@ -55,11 +68,11 @@ class Sale(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    sale_date = db.Column(db.Date, default=datetime.utcnow, index=True)
+    sale_date = db.Column(db.Date, default=current_wat_date, index=True)
     total_amount = db.Column(db.Float, default=0.0)
     payment_method = db.Column(db.String(50), default='cash')  # cash, card, mobile
     is_printed = db.Column(db.Boolean, default=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=current_wat_datetime)
     
     # Relationships
     items = db.relationship('SaleItem', backref='sale', lazy='dynamic', cascade='all, delete-orphan')

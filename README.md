@@ -8,10 +8,11 @@ Web-based Thermal Printer POS System with SQLite Database
 - **User Authentication**: 3 standard users + 1 admin account
 - **Product Management**: Admin can add, edit, and delete products
 - **Sales Tracking**: Daily sales recording with SQLite database
-- **Thermal Printer Support**: USB and Bluetooth printer detection
+- **Thermal Printer Support**: USB, Serial, and Bluetooth printer detection (specifically MPT-II SPP)
 - **Receipt Printing**: Automatic receipt generation with ESC/POS commands
 - **Analytics**: 7-day sales comparison with charts
 - **Dashboard**: Real-time statistics and quick actions
+- **Cross-Platform**: Supports Windows, Linux, and Android (via Termux)
 
 ## Setup
 
@@ -21,6 +22,8 @@ Web-based Thermal Printer POS System with SQLite Database
 - SQLAlchemy
 - PySerial
 - PyUSB
+- PyBluez (optional, for Bluetooth detection on Linux/Android)
+- Bluetooth hardware support on the host system
 
 ### Installation
 
@@ -37,6 +40,18 @@ python run.py
 ```
 
 The application will be available at `http://localhost:5000`
+
+### Printer Setup
+
+The application automatically detects MPT-II thermal printers via:
+- **USB**: Direct USB connection
+- **Bluetooth**: SPP (Serial Port Profile) - ensure the printer is discoverable and pair if needed
+- **Serial**: For already paired Bluetooth devices appearing as serial ports
+
+**Windows/Linux**: Pair the MPT-II via system Bluetooth settings first.
+**Android**: Use Termux with Python and ensure Bluetooth permissions.
+
+Default printer settings can be configured in `settings.py` or environment variables.
 
 ### Default Login Credentials
 
